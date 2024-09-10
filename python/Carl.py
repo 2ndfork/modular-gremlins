@@ -120,6 +120,15 @@ def SimpleTextVoicing(description, qualityIndex, voicingFunc):
   print("")
 
 
+def cup(shorthand, key ="C"):
+   print(realize(shorthand, key, cup=True))
+   print("\n")
+
+def triad(shorthand, key ="C"):
+   print(realize(shorthand, key, cup=False))
+   print("\n")   
+
+
 # A main function for parsing a progression of chords using
 # their short common name EX: C9, Gmaj7
 def realize(shorthand, key = "C", cup = False):
@@ -385,22 +394,22 @@ def dominantSevenFlatFiveDeck(chartFunc = SimpleTextChart):
 # for the purpose of learning these voicings
 
 def majorTrain():
-  SimpleTextVoicing("Cup Shape Interval (1 5 3)", 0, majorCup)
+  SimpleTextVoicing("Major Chords \nCup Shape Interval (1 5 3)", 0, majorCup)
   
 def minorTrain():
-  SimpleTextVoicing("Cup Shape Interval (1 5 b3)", 1, minorCup)
+  SimpleTextVoicing("Minor Chords \nCup Shape Interval (1 5 b3)", 1, minorCup)
   
 def dominantSevenTrain():
-  SimpleTextVoicing("Cup Shape Interval (1 b7 3 5)", 2, dominantSevenCup)   
+  SimpleTextVoicing("Dominant Seven Chords \nCup Shape Interval (1 b7 3 5)", 2, dominantSevenCup)   
 
 def minorSevenTrain():
-  SimpleTextVoicing("\nCup Shape Interval (1 b7 b3 5)", 3, minorSevenCup)
+  SimpleTextVoicing("Minor Seven Chords \nCup Shape Interval (1 b7 b3 5)", 3, minorSevenCup)
   
 def nineTrain():
-  SimpleTextVoicing("Cup Shape Interval (1 b7 3 5 9)", 4, nineCup)
+  SimpleTextVoicing("Nineth Chords \nCup Shape Interval (1 b7 3 5 9)", 4, nineCup)
  
 def minorNineTrain():
-  SimpleTextVoicing("Cup Shape Interval (1 b7 b3 5 9)", 5, minorNineCup)
+  SimpleTextVoicing("Minor Nineth Chords \nCup Shape Interval (1 b7 b3 5 9)", 5, minorNineCup)
 
 def elevenTrain():
   SimpleTextVoicing("Cup Shape Interval (1 3 b7 9 11)", 6, elevenCup)
@@ -760,6 +769,15 @@ qualityFunc = [major, minor, dominantSeven, minorSeven, nine, minorNine, eleven,
            augmented, augmentedSeven, suspended, dominantSevenFlatNine,
            dominantSevenSharpNine, dominantSevenFlatFive]
 
+
+qualityCardFunc = [majorCard, minorCard, dominantSevenCard, minorSevenCard, nineCard, minorNineCard, elevenCard,
+           minorElevenCard, thirteenCard, minorThirteenCard, majorSevenCard, minorMajorSevenCard, 
+           majorNineCard, minorMajorNineCard, majorThirteenCard, minorMajorThirteenCard, sixCard, 
+           minorSixCard, sixNineCard, minorSixNineCard, diminishedSevenCard, halfDiminishedCard,
+           augmentedCard, augmentedSevenCard, suspendedCard, dominantSevenFlatNineCard,
+           dominantSevenSharpNineCard, dominantSevenFlatFiveCard]
+
+
 qualityCupFunc = [majorCup, minorCup, dominantSevenCup, minorSevenCup, nineCup, 
            minorNineCup, elevenCup, minorElevenCup, thirteenCup, 
            minorThirteenCup, majorSevenCup, minorMajorSevenCup, majorNineCup, 
@@ -770,6 +788,38 @@ qualityCupFunc = [majorCup, minorCup, dominantSevenCup, minorSevenCup, nineCup,
            dominantSevenFlatFiveCup]           
 
 
+
+qualityTrainFunc = [majorTrain, minorTrain, dominantSevenTrain, minorSevenTrain, nineTrain, minorNineTrain, elevenTrain,
+           minorElevenTrain, thirteenTrain, minorThirteenTrain, majorSevenTrain, minorMajorSevenTrain, 
+           majorNineTrain, minorMajorNineTrain, majorThirteenTrain, minorMajorThirteenTrain, sixTrain, 
+           minorSixTrain, sixNineTrain, minorSixNineTrain, diminishedSevenTrain, halfDiminishedTrain,
+           augmentedTrain, augmentedSevenTrain, suspendedTrain, dominantSevenFlatNineTrain,
+           dominantSevenSharpNineTrain, dominantSevenFlatFiveTrain]
+
+
+def help():
+  print("\n\nQuick Reference. Please refer to the documentation for a ")
+  print("detailed explanation: \n")
+  print("Deck Methods: Imagine a deck of flashcards with ")
+  print("the name of a chord on each card. Using the Carl.deck() method ")
+  print("essentially shuffles this immaginary deck and gives you a  ")
+  print("practice exercise. Other similar methods will limit the types ")
+  print("of chords that the deck contains. Examples include: \n") 
+  print("     basicDeck() extendedDeck() colorfulDeck() diminishedDeck() ")
+  print("     alteredDeck() majorDeck() minorDeck() diminishedDeck() ")
+  print("     dominantSevenDeck() minorSevenDeck() nineDeck() ")
+  print("     minorNineDeck() elevenDeck() minorElevenDeck() ")
+  print("     thirteenDeck() minorThirteenDeck() majorSevenDeck() ")
+  print("     minorMajorSevenDeck() majorNineDeck() minorMajorNineDeck() ")
+  print("     majorThirteenDeck() minorMajorThirteenDeck() sixDeck() ")
+  print("     minorSixDeck() sixNineDeck() minorSixNineDeck() ")
+  print("     diminishedSevenDeck() halfDiminishedDeck() augmentedDeck() ")
+  print("     augmentedSevenDeck() suspendedDeck() dominantSevenFlatNineDeck() ")
+  print("     dominateSevenSharpNineDeck() dominantSevenFlatFiveDeck() ")
+  print("\n")
+  
+
+
 # *****************************************************************************
 # *****************************************************************************
 # *****************************************************************************
@@ -778,6 +828,38 @@ qualityCupFunc = [majorCup, minorCup, dominantSevenCup, minorSevenCup, nineCup,
 
 def commonQualities() :
   return str(quality)
+
+def shuffle():
+   deck()
+
+def shuffle(chordQuality):
+   if chordQuality == "":
+      deck()
+   else:
+    i = 0
+    while i < len(quality):
+      if quality[i] == chordQuality:
+        return SimpleTextChart(qualityCardFunc[i])
+      i = i + 1
+
+    print("Requested Chord Quality not found. Use one of: ")
+    return commonQualities()
+
+
+def train(chordQuality):
+   if chordQuality == "":
+      deck()
+   else:
+    i = 0
+    while i < len(quality):
+      if quality[i] == chordQuality:
+        return qualityTrainFunc[i]()
+      i = i + 1
+
+    print("Requested Chord Quality not found. Use one of: ")
+    return commonQualities()       
+         
+
 print("\n-------------------------------------")
 print("Carl: Gremlin, specializing in chords")
 print("Type Carl.help() if needed.")
