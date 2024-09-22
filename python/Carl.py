@@ -88,16 +88,20 @@ def SimpleTextChart(cardFunc):
     print(line)
     print(rhythm + "\n") 
 
+
+
 def rawChart(cardFunc) :
   retval = []
   for i in range(0,32):
     retval.append(cardFunc())
   return retval  
-  
+
+
+
 def processSlashBass(chordTop, chordBottom) :
   if(chordBottom == "") :
     return chordTop
-
+  
   bassNoteIndex = foldedKeys.index(chordBottom) % 12
   iCount = -1 
   for x in chordTop :
@@ -107,6 +111,8 @@ def processSlashBass(chordTop, chordBottom) :
   # If we get here, it is because the chordBottom was missing
   chordTop.insert(0,chordBottom)
   return chordTop     
+
+
 
 # An internal helper function to show the voicing of a single chord for
 # training purposes
@@ -118,151 +124,6 @@ def SimpleTextVoicing(description, qualityIndex, voicingFunc):
     cupString = " ".join(cup)
     print(rootName + quality[qualityIndex] + "\t(" + cupString + ")")
   print("")
-
-
-def cup(shorthand, key ="C"):
-   print(realize(shorthand, key, cup=True))
-   print("\n")
-
-def triad(shorthand, key ="C"):
-   print(realize(shorthand, key, cup=False))
-   print("\n")   
-
-
-# A main function for parsing a progression of chords using
-# their short common name EX: C9, Gmaj7
-def realize(shorthand, key = "C", cup = False):
-
-  threeOctave = []
-  chordFunc = major # default
-  chordInversion = 0
-  doCup = cup
-  funcIndex = 0
-  functionSelector = qualityFunc
-  qualityOffset = 0
-  noRoot = False
-  romanAccidental = ""
-  romanMinor = False
-  romanMajor = False
-  rootIndex = 0
-  remaining  = shorthand
-  slashBass = ""
-
-  # split it to allow chords separated by spaces
-  if " " in shorthand:
-    shorthand = shorthand.split()
-  
-  # if this a progression, then call it recursively
-  if isinstance(shorthand, list):
-        res = []
-        for x in shorthand:
-            res.append(realize(x, key, cup))
-        return res
-  
-
-  # Handle polychords separated by a semicolon
-  # Call in recursively only this time concat the two parts
-  # as individual elements rather than as an array
-  if ";" in shorthand:
-    shorthand = shorthand.split(";")
-    if isinstance(shorthand, list):
-        res = []
-        for x in shorthand:
-            poly = realize(x, key, cup)
-            for y in poly :
-              res.append(y)
-        return res
-
-  # Begin the process of handling slash Bass Notes
-  if "/" in shorthand :
-    shorthand = shorthand.split("/")
-    if isinstance(shorthand, list):
-        slashBass = shorthand[1]
-        shorthand = shorthand[0]
-
-
-  # If any accidentals comes first, then deal with it.
-  for x in range(0,len(shorthand)) : 
-    if shorthand[rootIndex] in romanAccidentals :
-      romanAccidental = romanAccidental + shorthand[rootIndex]
-      rootIndex = rootIndex + 1
-      qualityOffset = qualityOffset + 1
-    else :
-      break  
-
-
-  # If roman Numerals don't process yet
-  if shorthand[rootIndex] in romanNoteDigits:
-    rootName = ""
-    remaining = shorthand[rootIndex:]
-  else:
-    # else move on past the note Name
-    rootName = shorthand[rootIndex]
-    qualityOffset = qualityOffset + 1;
-    remaining = shorthand[(rootIndex + 1):]
-  
-  for n in remaining:
-      if n == "#":
-          rootName += n
-      elif n == "b":
-          if romanMajor or romanMinor :
-            chordInversion = 1
-          else :  
-            rootName += n
-      elif n == "c":
-          if romanMajor or romanMinor :
-            chordInversion = 2     
-      elif n == "^":
-          doCup = True  
-      elif n == "_":
-          noRoot = True   
-      elif n == "I":
-          rootName += n
-          romanMajor = True
-      elif n == "i":
-          rootName += n
-          romanMinor = True
-      elif n == "V":
-          rootName += n
-          romanMajor = True
-      elif n == "v":
-          rootName += n
-          romanMinor = True                        
-      else:
-          break
-      qualityOffset = qualityOffset + 1  
- 
-  # Do this now, as romanMinor may need it
-  chordQuality = shorthand[qualityOffset:] 
-  
-  # Deal with any romans now
-  if romanMajor:     
-    naturalRoot= naturalScale[romanMajorScale.index(rootName)]
-    naturalIndex = root.index(naturalRoot)
-    naturalIndex = naturalIndex + (foldedKeys.index(key) % 12)
-    threeOctave = getEnharmonicScale(naturalRoot, key)
-    rootName = threeOctave[naturalIndex] + romanAccidental
-
-  if romanMinor:     
-    naturalRoot= naturalScale[romanMinorScale.index(rootName)]
-    naturalIndex = root.index(naturalRoot)
-    naturalIndex = naturalIndex + (foldedKeys.index(key) % 12)
-    threeOctave = getEnharmonicScale(naturalRoot, key)
-    rootName = threeOctave[naturalIndex] + romanAccidental
-    if romanMinor and (chordQuality == "" or chordQuality[0] != 'm') :
-      chordQuality = 'm' + chordQuality;    
-  
-  rootName = convertEnharmonic(rootName, key)    
-
-  # find the right function to convert the chord name to pitch classes
-  if doCup :
-    functionSelector = qualityCupFunc
-  else:
-    functionSelector = qualityFunc
-
-  funcIndex = quality.index(chordQuality)
-  chordFunc = functionSelector[funcIndex]  
-  return processSlashBass(chordFunc(rootName, chordInversion, noRoot), slashBass)
 
 
 
@@ -286,8 +147,8 @@ def realize(shorthand, key = "C", cup = False):
 # library like music21 . And I wasn't convinced yet that, just for practice,
 #that I would really have the need for that feature.
 
-def deck(chartFunc = SimpleTextChart):
-  return chartFunc(card)
+def fullDeck(chartFunc = SimpleTextChart):
+  return chartFunc(anyCard)
 
 def basicDeck(chartFunc = SimpleTextChart):
   return chartFunc(basicCard)
@@ -303,90 +164,6 @@ def diminishedDeck(chartFunc = SimpleTextChart):
 
 def alteredDeck(chartFunc = SimpleTextChart):
   return chartFunc(alteredCard)
-
-def majorDeck(chartFunc = SimpleTextChart):
-  return chartFunc(majorCard)
-
-def minorDeck(chartFunc = SimpleTextChart):
-  return chartFunc(minorCard)
-  
-def dominantSevenDeck(chartFunc = SimpleTextChart):
-  return chartFunc(dominantSevenCard)
-
-def minorSevenDeck(chartFunc = SimpleTextChart):
-  return chartFunc(minorSevenCard)
-
-def nineDeck(chartFunc = SimpleTextChart):
-  return chartFunc(nineCard)
-
-def minorNineDeck(chartFunc = SimpleTextChart):
-  return chartFunc(minorNineCard)
-
-def elevenDeck(chartFunc = SimpleTextChart):
-  return chartFunc(elevenCard)
-
-def minorElevenDeck(chartFunc = SimpleTextChart):
-  return chartFunc(minorElevenCard)
-
-def thirteenDeck(chartFunc = SimpleTextChart):
-  return chartFunc(thirteenCard)
-
-def minorThirteenDeck(chartFunc = SimpleTextChart):
-  return chartFunc(minorThirteenCard)
-
-def majorSevenDeck(chartFunc = SimpleTextChart):
-  return chartFunc(majorSevenCard)
-
-def minorMajorSevenDeck(chartFunc = SimpleTextChart):
-  return chartFunc(minorMajorSevenCard)
-
-def majorNineDeck(chartFunc = SimpleTextChart):
-  return chartFunc(majorNineCard)
-
-def minorMajorNineDeck(chartFunc = SimpleTextChart):
-  return chartFunc(minorNineCard)
-
-def majorThirteenDeck(chartFunc = SimpleTextChart):
-  return chartFunc(majorThirteenCard)
-
-def minorMajorThirteenDeck(chartFunc = SimpleTextChart):
-  return chartFunc(minorMajorThirteenCard)
-
-def sixDeck(chartFunc = SimpleTextChart):
-  return chartFunc(sixCard)
-
-def minorSixDeck(chartFunc = SimpleTextChart):
-  return chartFunc(minorSixCard)
-
-def sixNineDeck(chartFunc = SimpleTextChart):
-  return chartFunc(sixNineCard)
-
-def minorSixNineDeck(chartFunc = SimpleTextChart):
-  return chartFunc(minorSixNineCard)
-
-def diminishedSevenDeck(chartFunc = SimpleTextChart):
-  return chartFunc(diminishedSevenCard)
-
-def halfDiminishedDeck(chartFunc = SimpleTextChart):
-  return chartFunc(halfDiminishedCard)
-
-def augmentedDeck(chartFunc = SimpleTextChart):
-  return chartFunc(augmentedCard)
-
-def augmentedSevenDeck(chartFunc = SimpleTextChart):
-  return chartFunc(augmentedSevenCard)
-
-def suspendedDeck(chartFunc = SimpleTextChart):
-  return chartFunc(suspendedCard)
-
-def dominantSevenFlatNineDeck(chartFunc = SimpleTextChart):
-  return chartFunc(dominantSevenFlatNineCard)
-  
-def dominantSevenSharpNineDeck(chartFunc = SimpleTextChart):
-  return chartFunc(dominantSevenSharpNineCard)
-
-def dominantSevenFlatFiveDeck(chartFunc = SimpleTextChart):
-  return chartFunc(dominantSevenFlatFiveCard)
 
 # ==============================================================================
 # All "Train" functions return a list of chord names of the type
@@ -412,70 +189,70 @@ def minorNineTrain():
   SimpleTextVoicing("Minor Nineth Chords \nCup Shape Interval (1 b7 b3 5 9)", 5, minorNineCup)
 
 def elevenTrain():
-  SimpleTextVoicing("Cup Shape Interval (1 3 b7 9 11)", 6, elevenCup)
+  SimpleTextVoicing("Eleven Chords \nCup Shape Interval (1 3 b7 9 11)", 6, elevenCup)
   
 def minorElevenTrain():
-  SimpleTextVoicing("Cup Shape Interval (1 b3 b7 9 11)", 7, minorElevenCup)
+  SimpleTextVoicing("Minor Eleven Chords \nCup Shape Interval (1 b3 b7 9 11)", 7, minorElevenCup)
   
 def thirteenTrain():
-  SimpleTextVoicing("Cup Shape Interval (1 b7 3 13 9)", 8, thirteenCup)
+  SimpleTextVoicing("Thirteenth Chords \nCup Shape Interval (1 b7 3 13 9)", 8, thirteenCup)
   
 def minorThirteenTrain():
-  SimpleTextVoicing("Cup Shape Interval (1 b7 b3 13 9)", 9, minorThirteenCup)
+  SimpleTextVoicing("Minor Thirteenth Chords \nCup Shape Interval (1 b7 b3 13 9)", 9, minorThirteenCup)
 
 def majorSevenTrain():
-  SimpleTextVoicing("Cup Shape Interval (1 7 3 5 )", 10, majorSevenCup)
+  SimpleTextVoicing("Major Seventh Chords \nCup Shape Interval (1 7 3 5 )", 10, majorSevenCup)
 
 def minorMajorSevenTrain():
-  SimpleTextVoicing("Cup Shape Interval (1 7 b3 5)", 11, minorMajorSevenCup)
+  SimpleTextVoicing("Minor Major Seventh Chords \nCup Shape Interval (1 7 b3 5)", 11, minorMajorSevenCup)
 
 def majorNineTrain():
-  SimpleTextVoicing("Cup Shape Interval (1 7 3 5 9)", 12, majorNineCup)
+  SimpleTextVoicing("Major Nineth Chords \nCup Shape Interval (1 7 3 5 9)", 12, majorNineCup)
   
 def minorMajorNineTrain():
-  SimpleTextVoicing("Cup Shape Interval (1 7 b3 5 9)", 13, minorMajorNineCup)
+  SimpleTextVoicing("Minor Major Nineth Chords \nCup Shape Interval (1 7 b3 5 9)", 13, minorMajorNineCup)
   
 def majorThirteenTrain():
-  SimpleTextVoicing("Cup Shape Interval (1 7 3 13 9)", 14, majorThirteenCup)
+  SimpleTextVoicing("Major Thirteenth Chords \nCup Shape Interval (1 7 3 13 9)", 14, majorThirteenCup)
 
 def minorMajorThirteenTrain():
-  SimpleTextVoicing("Cup Shape Interval (1 7 b3 13 9)", 15, minorMajorThirteenCup)
+  SimpleTextVoicing("Minor Major Thirteenth Chords \nCup Shape Interval (1 7 b3 13 9)", 15, minorMajorThirteenCup)
 
 def sixTrain():
-  SimpleTextVoicing("Cup Shape Interval (1 5 3 6)", 16, sixCup)
+  SimpleTextVoicing("Sixth Chords \nCup Shape Interval (1 5 3 6)", 16, sixCup)
 
 def minorSixTrain():
-  SimpleTextVoicing("Cup Shape Interval (1 5 b3 6)", 17, minorSixCup)  
+  SimpleTextVoicing("Minor Sixth Chords \nCup Shape Interval (1 5 b3 6)", 17, minorSixCup)  
 
 def sixNineTrain():
-  SimpleTextVoicing("Cup Shape Interval (1 5 3 6 9)", 18, sixNineCup)
+  SimpleTextVoicing("Six Nine Chords \nCup Shape Interval (1 5 3 6 9)", 18, sixNineCup)
 
 def minorSixNineTrain():
-  SimpleTextVoicing("Cup Shape Interval (1 5 b3 6 9)", 19, minorSixNineCup)  
+  SimpleTextVoicing("Minor Six Nine Chords \nCup Shape Interval (1 5 b3 6 9)", 19, minorSixNineCup)  
      
 def diminishedSevenTrain():
-  SimpleTextVoicing("Cup Shape Interval (1 bb7 b3 b5)", 20, diminishedSevenCup)
+  SimpleTextVoicing("Diminished Seven Chords \nCup Shape Interval (1 bb7 b3 b5)", 20, diminishedSevenCup)
 
 def halfDiminishedTrain():
-  SimpleTextVoicing("Cup Shape Interval (1 b7 b3 b5)", 21, halfDiminishedCup)
+  SimpleTextVoicing("Half Diminished Chords \nCup Shape Interval (1 b7 b3 b5)", 21, halfDiminishedCup)
 
 def augmentedTrain():
-  SimpleTextVoicing("Cup Shape Interval (1 #5 3)", 22, augmentedCup)
+  SimpleTextVoicing("Augmented Chords \nCup Shape Interval (1 #5 3)", 22, augmentedCup)
 
 def augmentedSevenTrain():
-  SimpleTextVoicing("Cup Shape Interval (1 b7 3 #5)", 23, augmentedSevenCup)
+  SimpleTextVoicing("Augmented Seventh Chords \nCup Shape Interval (1 b7 3 #5)", 23, augmentedSevenCup)
 
 def suspendedTrain():
-  SimpleTextVoicing("Cup Shape Interval (1 5 b7 4)", 24, suspendedCup)
+  SimpleTextVoicing("Suspendecd Chords \nCup Shape Interval (1 5 b7 4)", 24, suspendedCup)
 
 def dominantSevenFlatNineTrain():
-  SimpleTextVoicing("Cup Shape Interval (1 b7 3 5 b9)", 25, dominantSevenFlatNineCup)
+  SimpleTextVoicing("Dominant Seven Flat Nine Chords \nCup Shape Interval (1 b7 3 5 b9)", 25, dominantSevenFlatNineCup)
 
 def dominantSevenSharpNineTrain():
-  SimpleTextVoicing("Cup Shape Interval (1 b7 3 5 #9)", 26, dominantSevenSharpNineCup)
+  SimpleTextVoicing("Dominant Seven Shart Nine Chords \nCup Shape Interval (1 b7 3 5 #9)", 26, dominantSevenSharpNineCup)
 
 def dominantSevenFlatFiveTrain():
-  SimpleTextVoicing("Cup Shape Interval (1 b7 3 b5)", 27, dominantSevenFlatFiveCup) 
+  SimpleTextVoicing("Dominant Seven Flat Five Chords \nCup Shape Interval (1 b7 3 b5)", 27, dominantSevenFlatFiveCup) 
 
 
 # ==============================================================================
@@ -483,7 +260,7 @@ def dominantSevenFlatFiveTrain():
 # purposes of practice.You will usually prefer to use one of the deck
 # which return a randomized list of chords
 
-def card():
+def anyCard():
   return root[random.randint(0,11)] + quality[random.randint(0,27)]
 
 def basicCard():
@@ -796,72 +573,232 @@ qualityTrainFunc = [majorTrain, minorTrain, dominantSevenTrain, minorSevenTrain,
            augmentedTrain, augmentedSevenTrain, suspendedTrain, dominantSevenFlatNineTrain,
            dominantSevenSharpNineTrain, dominantSevenFlatFiveTrain]
 
-
-def help():
-  print("\n\nQuick Reference. Please refer to the documentation for a ")
-  print("detailed explanation: \n")
-  print("Deck Methods: Imagine a deck of flashcards with ")
-  print("the name of a chord on each card. Using the Carl.deck() method ")
-  print("essentially shuffles this immaginary deck and gives you a  ")
-  print("practice exercise. Other similar methods will limit the types ")
-  print("of chords that the deck contains. Examples include: \n") 
-  print("     basicDeck() extendedDeck() colorfulDeck() diminishedDeck() ")
-  print("     alteredDeck() majorDeck() minorDeck() diminishedDeck() ")
-  print("     dominantSevenDeck() minorSevenDeck() nineDeck() ")
-  print("     minorNineDeck() elevenDeck() minorElevenDeck() ")
-  print("     thirteenDeck() minorThirteenDeck() majorSevenDeck() ")
-  print("     minorMajorSevenDeck() majorNineDeck() minorMajorNineDeck() ")
-  print("     majorThirteenDeck() minorMajorThirteenDeck() sixDeck() ")
-  print("     minorSixDeck() sixNineDeck() minorSixNineDeck() ")
-  print("     diminishedSevenDeck() halfDiminishedDeck() augmentedDeck() ")
-  print("     augmentedSevenDeck() suspendedDeck() dominantSevenFlatNineDeck() ")
-  print("     dominateSevenSharpNineDeck() dominantSevenFlatFiveDeck() ")
-  print("\n")
   
-
-
 # *****************************************************************************
 # *****************************************************************************
 # *****************************************************************************
 # *****************************************************************************
 # PUBLIC INTERFACE
 
+
+# *****************************************************************************
+# Displays the chord qualities that Carl understands
 def commonQualities() :
   return str(quality)
 
-def shuffle():
-   deck()
 
-def shuffle(chordQuality):
-   if chordQuality == "":
-      deck()
-   else:
-    i = 0
-    while i < len(quality):
-      if quality[i] == chordQuality:
-        return SimpleTextChart(qualityCardFunc[i])
-      i = i + 1
+# -------------------------------------------------------------------
+# Creates a deck of chord flash cards
+def deck(chordQuality):
+  try:  
+    if isinstance(chordQuality, int) and chordQuality < len(quality) and chordQuality >= 0:
+      return SimpleTextChart(qualityCardFunc[chordQuality])
+    elif chordQuality.find('basic') >= 0 :
+      return basicDeck()
+    elif chordQuality.find('extended') >= 0 :
+      return extendedDeck()
+    elif chordQuality.find('colorful') >= 0 :
+      return colorfulDeck()
+    elif chordQuality.find('altered') >= 0 :
+      return alteredDeck()
+    elif chordQuality.find('diminished') >= 0 :
+      return diminishedDeck()
+    elif chordQuality.find('full') >= 0 :
+      return fullDeck()
+    else:
+      i = 0
+      while i < len(quality):
+        if quality[i] == chordQuality:
+          return SimpleTextChart(qualityCardFunc[i])
+        i = i + 1
 
-    print("Requested Chord Quality not found. Use one of: ")
-    return commonQualities()
+    print("\nRequested chord quality for the Deck was not found. Use one of: ")
+    print(commonQualities())
+    print("\nAlternative: Use an Integer between 0-27 for the day in a rotating practice schedule")
+    print("Alternative: Use one of \'basic\' \'extended\' \'colorful\' \'altered\' \'diminished\' \'full\'")
+  
+  except:
+    print("\nRequested chord quality for the Deck was not found. Use one of: ")
+    print(commonQualities())
+    print("\nAlternative: Use an Integer between 0-27 for the day in a rotating practice schedule")
+    print("Alternative: Use one of \'basic\' \'extended\' \'colorful\' \'altered\' \'diminished\' \'full\'")  
 
 
+# -------------------------------------------------------------------
+# Displays the voicing of a set of chords (As specified by quality or root)
+# for training purposes.
 def train(chordQuality):
-   if chordQuality == "":
-      deck()
-   else:
-    i = 0
-    while i < len(quality):
-      if quality[i] == chordQuality:
-        return qualityTrainFunc[i]()
-      i = i + 1
+  try: 
+    if chordQuality in foldedKeys :
+      rootName = chordQuality
+      print("\nCommon Chord Qualities for " + rootName + " using cup shapes\n")
+      for i in range(0, (len(qualityCupFunc)-1)):
+        cup = qualityCupFunc[i](rootName)
+        cupString = " ".join(cup)
+        chordName = rootName + quality[i]
+        tab_space = "\t\t"
+        if len(chordName) > 7 :
+          tab_space = "\t"
+        print(chordName + tab_space + "(" + cupString + ")")
+      print("")
 
-    print("Requested Chord Quality not found. Use one of: ")
-    return commonQualities()       
-         
+    else:
+      i = 0
+      while i < len(quality):
+        if quality[i] == chordQuality:
+          return qualityTrainFunc[i]()
+        i = i + 1
 
-print("\n-------------------------------------")
+      print("Either specify the root of a chord (A-G) -OR- use one of: ")
+      return commonQualities()
+  except:
+      print("Either specify the root of a chord (A-G) -OR- use one of: ")
+      return commonQualities()
+            
+
+
+# ----------------------------------------------------------------
+# A main function for parsing a progression of chords using
+# their short common name EX: C9, Gmaj7
+def realize(shorthand, key = "C", cup = False):
+  try:
+    threeOctave = []
+    chordFunc = major # default
+    chordInversion = 0
+    doCup = cup
+    funcIndex = 0
+    functionSelector = qualityFunc
+    qualityOffset = 0
+    noRoot = False
+    romanAccidental = ""
+    romanMinor = False
+    romanMajor = False
+    rootIndex = 0
+    remaining  = shorthand
+    slashBass = ""
+
+    # split it to allow chords separated by spaces
+    if " " in shorthand:
+      shorthand = shorthand.split()
+
+    # if this a progression, then call it recursively
+    if isinstance(shorthand, list):
+          res = []
+          for x in shorthand:
+              res.append(realize(x, key, cup))
+          return res
+
+
+    # Handle polychords separated by a semicolon
+    # Call in recursively only this time concat the two parts
+    # as individual elements rather than as an array
+    if ";" in shorthand:
+      shorthand = shorthand.split(";")
+      if isinstance(shorthand, list):
+          res = []
+          for x in shorthand:
+              poly = realize(x, key, cup)
+              for y in poly :
+                res.append(y)
+          return res
+
+    # Begin the process of handling slash Bass Notes
+    if "/" in shorthand :
+      shorthand = shorthand.split("/")
+      if isinstance(shorthand, list):
+          slashBass = shorthand[1]
+          shorthand = shorthand[0]
+
+
+    # If any accidentals comes first, then deal with it.
+    for x in range(0,len(shorthand)) : 
+      if shorthand[rootIndex] in romanAccidentals :
+        romanAccidental = romanAccidental + shorthand[rootIndex]
+        rootIndex = rootIndex + 1
+        qualityOffset = qualityOffset + 1
+      else :
+        break  
+
+
+    # If roman Numerals don't process yet
+    if shorthand[rootIndex] in romanNoteDigits:
+      rootName = ""
+      remaining = shorthand[rootIndex:]
+    else:
+      # else move on past the note Name
+      rootName = shorthand[rootIndex]
+      qualityOffset = qualityOffset + 1;
+      remaining = shorthand[(rootIndex + 1):]
+
+    for n in remaining:
+        if n == "#":
+            rootName += n
+        elif n == "b":
+            if romanMajor or romanMinor :
+              chordInversion = 1
+            else :  
+              rootName += n
+        elif n == "c":
+            if romanMajor or romanMinor :
+              chordInversion = 2     
+        elif n == "^":
+            doCup = True  
+        elif n == "_":
+            noRoot = True   
+        elif n == "I":
+            rootName += n
+            romanMajor = True
+        elif n == "i":
+            rootName += n
+            romanMinor = True
+        elif n == "V":
+            rootName += n
+            romanMajor = True
+        elif n == "v":
+            rootName += n
+            romanMinor = True                        
+        else:
+            break
+        qualityOffset = qualityOffset + 1  
+
+    # Do this now, as romanMinor may need it
+    chordQuality = shorthand[qualityOffset:] 
+
+    # Deal with any romans now
+    if romanMajor:     
+      naturalRoot= naturalScale[romanMajorScale.index(rootName)]
+      naturalIndex = root.index(naturalRoot)
+      naturalIndex = naturalIndex + (foldedKeys.index(key) % 12)
+      threeOctave = getEnharmonicScale(naturalRoot, key)
+      rootName = threeOctave[naturalIndex] + romanAccidental
+
+    if romanMinor:     
+      naturalRoot= naturalScale[romanMinorScale.index(rootName)]
+      naturalIndex = root.index(naturalRoot)
+      naturalIndex = naturalIndex + (foldedKeys.index(key) % 12)
+      threeOctave = getEnharmonicScale(naturalRoot, key)
+      rootName = threeOctave[naturalIndex] + romanAccidental
+      if romanMinor and (chordQuality == "" or chordQuality[0] != 'm') :
+        chordQuality = 'm' + chordQuality;    
+
+    rootName = convertEnharmonic(rootName, key)    
+
+    # find the right function to convert the chord name to pitch classes
+    if doCup :
+      functionSelector = qualityCupFunc
+    else:
+      functionSelector = qualityFunc
+
+    funcIndex = quality.index(chordQuality)
+    chordFunc = functionSelector[funcIndex]  
+    return processSlashBass(chordFunc(rootName, chordInversion, noRoot), slashBass)
+
+  except Exception as e:
+     print("\nInvalid Input - You may wish to refer to the documentation in readme-carl.md as this is a powerful function with lots of possibilities\n")
+
+# ----------------------------------------------------------------
+print("\n--------------------------------------------")
 print("Carl: Gremlin, specializing in chords")
-print("Type Carl.help() if needed.")
-print("-------------------------------------\n")
+print("Carl says \'Hello\'")
+print("----------------------------------------------\n")
 
